@@ -24,10 +24,10 @@ typedef enum Corruption {
 } Corruption;
 
 // Possible funcion errors
-typedef enum CorruptError {
+typedef enum CorruptResult {
     SUCCESS,
     ERR_NULLPTR,
-} CorruptError;
+} CorruptResult;
 
 
 // Corrupts byte via bit manipulation
@@ -42,7 +42,7 @@ int corrupt_char(int byte) {
 Corrupts the file with specified corruption method. Returns 0 if 
 successful, 1 - if FILE is NULL.
 */
-CorruptError corrupt(FILE* file, Corruption corruption) {
+CorruptResult corrupt(FILE* file, Corruption corruption) {
     if (!file) {
         return ERR_NULLPTR;
     } else if (feof(file)) {
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
     unsigned int file_path_index = 0;
     FILE* file = NULL;
     Corruption corruption_method = CORRUPTION_BITMAGIC;
-    CorruptError result;
+    CorruptResult result;
 
     unsigned int i = 1;
     while (i < argc) {

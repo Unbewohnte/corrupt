@@ -49,12 +49,26 @@ CorruptError corrupt(FILE* file, Corruption corruption) {
         rewind(file);
     }
 
-    int character;
-    while ((character = fgetc(file)) != EOF) {
-        fseek(file, -1, SEEK_CUR);
+    long long read_bytes = 0;
+    char buff[1024];
+    char corrupted_buf[1024];
+    while (1) {
+        // read chunk
+        read_bytes = fread(buff, 1, 1024, file);
 
+        // set cursor at the beginning        
+        fseek(file, -read_bytes, SEEK_CUR);
+
+        // replace the original bytes with corrupted ones 
         if (corruption == CORRUPTION_BITMAGIC) {
-            fputc(corrupt_char(character), file);
+            for (unsigned int i = 0; i < read_bytes; i++) {
+               corrupted_buf[i] = corrupt_char(buff[i]);
+            }
+            fwrite(corrupted_buf, 1, read_bytes, file);
+        }
+
+        if (read_bytes < 1024 || feof(file)) {
+            break;
         }
     }
 
@@ -80,7 +94,7 @@ int main(int argc, char** argv) {
         } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
             fprintf(
                 stdout,
-                "corrupt v0.1.0 - a utility to corrupt FILE streams\n(c) Kasyanov Nikolay Alexeyevich (Unbewohnte)\n"
+                "corrupt v0.1.1 - a utility to corrupt FILE streams\n(c) Kasyanov Nikolay Alexeyevich (Unbewohnte)\n"
             );
             return SUCCESS;
         } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--method") == 0) {

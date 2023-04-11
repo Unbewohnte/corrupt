@@ -18,11 +18,6 @@ corrupt.c - a utility to corrupt FILE streams
 #include <errno.h>
 #include <string.h>
 
-// Corruption method. TODO(add more)
-typedef enum Corruption {
-    CORRUPTION_BITMAGIC, // Corrupt each byte via bit manipulation
-} Corruption;
-
 // Possible funcion errors
 typedef enum CorruptResult {
     SUCCESS,
@@ -42,7 +37,7 @@ int corrupt_char(int byte) {
 Corrupts the file with specified corruption method. Returns 0 if 
 successful, 1 - if FILE is NULL.
 */
-CorruptResult corrupt(FILE* file, Corruption corruption) {
+CorruptResult corrupt(FILE* file) {
     if (!file) {
         return ERR_NULLPTR;
     } else if (feof(file)) {
@@ -60,12 +55,10 @@ CorruptResult corrupt(FILE* file, Corruption corruption) {
         fseek(file, -read_bytes, SEEK_CUR);
 
         // replace the original bytes with corrupted ones 
-        if (corruption == CORRUPTION_BITMAGIC) {
-            for (unsigned int i = 0; i < read_bytes; i++) {
-               corrupted_buf[i] = corrupt_char(buff[i]);
-            }
-            fwrite(corrupted_buf, 1, read_bytes, file);
+        for (unsigned int i = 0; i < read_bytes; i++) {
+            corrupted_buf[i] = corrupt_char(buff[i]);
         }
+        fwrite(corrupted_buf, 1, read_bytes, file);
 
         if (read_bytes < 1024 || feof(file)) {
             break;
@@ -79,7 +72,6 @@ int main(int argc, char** argv) {
     char* file_paths[argc-1];
     unsigned int file_path_index = 0;
     FILE* file = NULL;
-    Corruption corruption_method = CORRUPTION_BITMAGIC;
     CorruptResult result;
 
     unsigned int i = 1;
@@ -88,27 +80,15 @@ int main(int argc, char** argv) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             fprintf(
                 stdout, 
-                "corrupt -[hvm] FILE...\n\n-h --help -> Print this message and exit\n-v --version -> Print version information and exit\n-m --method METHOD (bit) -> Specify corruption method\n"
+                "corrupt -[hv] FILE...\n\n-h --help    -> Print this message and exit\n-v --version -> Print version information and exit\n"
             );
             return SUCCESS;
         } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
             fprintf(
                 stdout,
-                "corrupt v0.1.1 - a utility to corrupt FILE streams\n(c) Kasyanov Nikolay Alexeyevich (Unbewohnte)\n"
+                "corrupt v0.1.2 - a utility to corrupt FILE streams\n(c) Kasyanov Nikolay Alexeyevich (Unbewohnte)\n"
             );
             return SUCCESS;
-        } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--method") == 0) {
-            i++;
-            if (strcmp(argv[i], "bit") == 0) {
-                corruption_method = CORRUPTION_BITMAGIC;
-            } else {
-                corruption_method = CORRUPTION_BITMAGIC;
-                fprintf(
-                    stdout,
-                    "Invalid corruption method \"%s\". Defaulting to \"bit\"\n",
-                    argv[i]
-                );
-            }
         } else {
             // remember this path
             file_paths[file_path_index] = argv[i];
@@ -134,7 +114,7 @@ int main(int argc, char** argv) {
         );
 
         // corrupt the whole stream
-        result = corrupt(file, corruption_method);
+        result = corrupt(file);
         if (result == ERR_NULLPTR) {
             fprintf(
                 stdout, 

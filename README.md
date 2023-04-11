@@ -3,22 +3,20 @@
 
 ### Usage
 
-`corrupt -[hvm] FILE...`
+`corrupt -[hv] FILE...`
 
 Flags
 
 - `-h` to see the relevant usage information
 - `-v` to get version information
-- `-m METHOD (bit)` to specify corruption method (MORE TO BE ADDED)
 
-### Examples
+### Example
 
-- `corrupt testfile.txt` - corrupt `testfile.txt` with default corruption method
-- `corrupt -m bit testfile.txt` - corrupt `testfile.txt` with `bit` corruption method 
+- `corrupt testfile.txt` - corrupt `testfile.txt`
 
 ### Build
 
-Simply `make` or if you don't have it - compile `corrupt.c` with the compiler of choice. The only dependency is the () standart library 
+Simply `make` or if you don't have it - compile `corrupt.c` with the compiler of choice. The only dependency is the standart library. 
 
 ### License
 
